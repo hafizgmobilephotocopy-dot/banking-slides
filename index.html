@@ -373,11 +373,20 @@
     // Scale to fit slide-area dimensions with padding
     const aw = slideArea.clientWidth  - 32;
     const ah = slideArea.clientHeight - 32;
-    const scale = Math.min(aw / vp0.width, ah / vp0.height, 3);
-    const vp = page.getViewport({ scale });
+    const cssScale = Math.min(aw / vp0.width, ah / vp0.height, 3);
+    
+    // Account for high-DPI screens (Retina displays on phones)
+    const pixelRatio = window.devicePixelRatio || 1;
+    const renderScale = cssScale * pixelRatio;
+    
+    const vp = page.getViewport({ scale: renderScale });
 
     canvas.width  = vp.width;
     canvas.height = vp.height;
+    
+    // Keep CSS dimensions strictly to the calculated layout size
+    canvas.style.width = `${vp.width / pixelRatio}px`;
+    canvas.style.height = `${vp.height / pixelRatio}px`;
 
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
